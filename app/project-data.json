@@ -1,0 +1,52 @@
+{
+  "projects": [
+    {
+      "name": "Contributor Hub",
+      "summary": "A searchable home for onboarding guides, team norms, and the small details that help new contributors ship confidently.",
+      "owner": "Aisha Patel",
+      "status": "Active",
+      "recentActivity": "Published the refreshed local setup guide and collected feedback from three new contributors.",
+      "priority": "High"
+    },
+    {
+      "name": "Release Notes Refresh",
+      "summary": "Making release updates easier to scan by connecting shipped changes with the people and teams who need them.",
+      "owner": "Marco Ruiz",
+      "status": "Active",
+      "recentActivity": "Drafted the next release outline and added a lightweight review checklist.",
+      "priority": "Medium"
+    },
+    {
+      "name": "Accessibility Sweep",
+      "summary": "A focused pass across shared interfaces to remove keyboard, contrast, and screen-reader friction before the next milestone.",
+      "owner": "Jordan Kim",
+      "status": "At risk",
+      "recentActivity": "Found two high-impact focus-order issues; pairing sessions are scheduled for this week.",
+      "priority": "Urgent"
+    },
+    {
+      "name": "Design System Starter",
+      "summary": "A practical set of reusable patterns and guidance so contributors can build consistent experiences without starting from scratch.",
+      "owner": "Nia Thompson",
+      "status": "Planning",
+      "recentActivity": "Aligned on the first component set and opened a call for examples from product teams.",
+      "priority": "Medium"
+    },
+    {
+      "name": "Community Office Hours",
+      "summary": "A recurring space for contributors to ask questions, share work in progress, and turn common blockers into better documentation.",
+      "owner": "Samir Shah",
+      "status": "Complete",
+      "recentActivity": "Wrapped the pilot series with 18 attendees and published the recording index.",
+      "priority": "Low"
+    },
+    {
+      "name": "Performance Playbook",
+      "summary": "Collecting approachable performance checks and troubleshooting steps that teams can use during everyday development.",
+      "owner": "Elena Novak",
+      "status": "Active",
+      "recentActivity": "Benchmarked the dashboard shell and added a guide for investigating slow asset loads.",
+      "priority": "High"
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A contributor-focused view of project ownership, status, priority, and recent activity.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-content">
+        <p class="eyebrow">Team workspace</p>
+        <h1>Project Pulse</h1>
+        <p class="page-description">
+          A clear, contributor-focused view of what is moving forward, who owns it, and where help is most useful.
+        </p>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="project-section" aria-labelledby="projects-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Shared momentum</p>
+            <h2 id="projects-heading">Projects at a glance</h2>
+          </div>
+          <p id="project-count" class="project-count" hidden></p>
+        </div>
+
+        <p id="loading-state" class="state-message" role="status" aria-live="polite">
+          Loading project updates…
+        </p>
+
+        <div id="error-state" class="state-message state-message--error" role="alert" hidden>
+          <strong>We couldn’t load the project updates.</strong>
+          <span>Please try again or check that the data file is available.</span>
+          <button id="retry-button" class="button button--secondary" type="button">Try again</button>
+        </div>
+
+        <div id="empty-state" class="state-message" role="status" hidden>
+          <strong>No projects to show yet.</strong>
+          <span>When projects are added, their latest pulse will appear here.</span>
+        </div>
+
+        <div id="project-grid" class="project-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const loadingState = document.querySelector("#loading-state");
+        const errorState = document.querySelector("#error-state");
+        const emptyState = document.querySelector("#empty-state");
+        const projectGrid = document.querySelector("#project-grid");
+        const projectCount = document.querySelector("#project-count");
+        const retryButton = document.querySelector("#retry-button");
+        const fallback = "Not provided";
+        const fieldLabels = {
+          owner: "Owner",
+          status: "Status",
+          recentActivity: "Recent activity",
+          priority: "Priority"
+        };
+
+        const getValue = (project, field) => {
+          const value = project && project[field];
+          return typeof value === "string" && value.trim() ? value.trim() : fallback;
+        };
+
+        const getModifier = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+        const createMetadata = (label, value, modifier) => {
+          const item = document.createElement("div");
+          item.className = "metadata-item";
+
+          const itemLabel = document.createElement("dt");
+          itemLabel.textContent = label;
+          item.appendChild(itemLabel);
+
+          const itemValue = document.createElement("dd");
+          if (modifier) {
+            const badge = document.createElement("span");
+            badge.className = `badge ${modifier}`;
+            badge.textContent = value;
+            itemValue.appendChild(badge);
+          } else {
+            itemValue.textContent = value;
+          }
+          item.appendChild(itemValue);
+          return item;
+        };
+
+        const createProjectCard = (project, index) => {
+          const name = getValue(project, "name");
+          const summary = getValue(project, "summary");
+          const status = getValue(project, "status");
+          const priority = getValue(project, "priority");
+          const card = document.createElement("article");
+          card.className = "project-card";
+          card.setAttribute("aria-labelledby", `project-title-${index}`);
+
+          const cardHeader = document.createElement("div");
+          cardHeader.className = "card-header";
+          const title = document.createElement("h3");
+          title.id = `project-title-${index}`;
+          title.textContent = name;
+          cardHeader.appendChild(title);
+
+          const summaryElement = document.createElement("p");
+          summaryElement.className = "project-summary";
+          summaryElement.textContent = summary;
+          card.appendChild(cardHeader);
+          card.appendChild(summaryElement);
+
+          const metadata = document.createElement("dl");
+          metadata.className = "metadata-list";
+          metadata.appendChild(createMetadata(fieldLabels.owner, getValue(project, "owner")));
+          metadata.appendChild(createMetadata(fieldLabels.status, status, `badge--status badge--${getModifier(status)}`));
+          metadata.appendChild(createMetadata(fieldLabels.priority, priority, `badge--priority badge--${getModifier(priority)}`));
+          card.appendChild(metadata);
+
+          const activity = document.createElement("div");
+          activity.className = "activity";
+          const activityLabel = document.createElement("span");
+          activityLabel.className = "activity-label";
+          activityLabel.textContent = fieldLabels.recentActivity;
+          const activityText = document.createElement("p");
+          activityText.textContent = getValue(project, "recentActivity");
+          activity.appendChild(activityLabel);
+          activity.appendChild(activityText);
+          card.appendChild(activity);
+          return card;
+        };
+
+        const setState = (state) => {
+          loadingState.hidden = state !== "loading";
+          errorState.hidden = state !== "error";
+          emptyState.hidden = state !== "empty";
+          projectGrid.hidden = state !== "ready";
+        };
+
+        const renderProjects = (projects) => {
+          projectGrid.replaceChildren();
+          const validProjects = Array.isArray(projects) ? projects : [];
+          validProjects.forEach((project, index) => {
+            projectGrid.appendChild(createProjectCard(project, index));
+          });
+
+          if (validProjects.length === 0) {
+            projectCount.hidden = true;
+            setState("empty");
+            return;
+          }
+
+          projectCount.textContent = `${validProjects.length} ${validProjects.length === 1 ? "project" : "projects"}`;
+          projectCount.hidden = false;
+          setState("ready");
+        };
+
+        const loadProjects = async () => {
+          setState("loading");
+          try {
+            const response = await fetch("project-data.json", { cache: "no-store" });
+            if (!response.ok) {
+              throw new Error(`Project data request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            renderProjects(data.projects);
+          } catch (error) {
+            projectGrid.replaceChildren();
+            projectCount.hidden = true;
+            setState("error");
+          }
+        };
+
+        retryButton.addEventListener("click", loadProjects);
+        loadProjects();
+      })();
+    </script>
+  </body>
+</html>
